@@ -12,7 +12,9 @@ Poniższe zadania będą się sprowadzały do modyfikacji bazowego kodu. Proces 
 //Niepoprawny wiek – gdy jest mniejszy od 0 lub większy niż 100. Niepoprawna data urodzenia – gdy nie jest zapisana w formacie DD-MM-YYYY, np. 28-02-2023.
 import java.io.IOException;
 import java.util.Scanner;
-import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 class WrongStudentName extends Exception { }
 class WrongAge extends Exception { }
 class WrongDateOfBirth extends Exception { }
@@ -26,7 +28,7 @@ class Main {
                     case 1: exercise1(); break;
                     case 2: exercise2(); break;
                     case 3: exercise3(); break;
-                    default: return;
+                    default: System.out.println("Nieprawidłowy wybór"); break;
                 }
             } catch(IOException e) {
             } catch(WrongStudentName e) {
@@ -35,6 +37,8 @@ class Main {
                 System.out.println("Niepoprawny wiek studenta!");
             } catch(WrongDateOfBirth e) {
                 System.out.println("Niepoprawna data urodzenia studenta!");
+            } catch (IllegalArgumentException e) {
+                System.out.println("Wiek nie zgadza się z datą urodzenia!");
             }
         }
     }
@@ -54,6 +58,7 @@ class Main {
             throw new WrongStudentName();
         return name;
     }
+     /// wiek 6.1
     public static int ReadAge() throws WrongAge {
         System.out.println("Podaj wiek: ");
         var age = scan.nextInt();
@@ -62,11 +67,11 @@ class Main {
         scan.nextLine();
         return age;
     }
+    // data urodzenia 6.2
     public static String ReadDate() throws WrongDateOfBirth {
         System.out.println("Podaj datę urodzenia DD-MM-YYY");
         var date = scan.nextLine();
         if(date.length() != 10 || !date.contains("-") || !Character.isDigit(date.charAt(0)) || !Character.isDigit(date.charAt(1)) || !Character.isDigit(date.charAt(3)) || !Character.isDigit(date.charAt(4)) || !Character.isDigit(date.charAt(6)) || !Character.isDigit(date.charAt(7)) || !Character.isDigit(date.charAt(8)) || !Character.isDigit(date.charAt(9)))
-
             throw new WrongDateOfBirth();
         return date;
     }
@@ -74,8 +79,16 @@ class Main {
         var name = ReadName();
         var age = ReadAge();
         var date = ReadDate();
-        //tutaj
-        //var date = ReadDate();
+    
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        LocalDate dob = LocalDate.parse(date, formatter);
+        
+        long calculatedAge = ChronoUnit.YEARS.between(dob, LocalDate.now());
+      
+        if (calculatedAge != age) {
+            throw new IllegalArgumentException();
+        }
+      
         (new Service()).addStudent(new Student(name, age, date));
     }
     public static void exercise2() throws IOException {
